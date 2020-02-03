@@ -1,18 +1,15 @@
 package com.rekkursion.exactratingbar
 
-import android.graphics.Canvas
-import android.graphics.Paint
-import android.graphics.Path
+import android.graphics.*
 import kotlin.math.*
 
-enum class StarStyle(val singleStarRenderFunc: (Canvas, Paint, Float, Float, Float, Int, Int, Float) -> Unit) {
-    STAR({ canvas, paint, x, y, size, valueColor, baseColor, valuedRatio ->
-        // ban-jing
+enum class StarStyle(val getShapedPath: (x: Float, y: Float, size: Float) -> Path) {
+    STAR({ x, y, size ->
         val r = size / 2F
-        // the coordinate of the center
-        val cX = x + r; val cY = y + r
+        val cX = x + r
+        val cY = y + r
 
-        // the path object for rendering the complex polygon
+        // the path object
         val path = Path()
         // get the points of a star shape
         for (idx in 0..5) {
@@ -21,53 +18,48 @@ enum class StarStyle(val singleStarRenderFunc: (Canvas, Paint, Float, Float, Flo
         }
         // close the path
         path.close()
+        // return the path
+        path
+    }),
 
-        // render the path
+    CIRCLE({ x, y, size ->
+        // the radius (ban-jing)
+        val r = size / 2F
+        // the path object
+        val path = Path()
+        // add a circle into the path
+        path.addCircle(x + r, y + r, r, Path.Direction.CW)
+        // return the path
+        path
+    }),
+
+    SQUARE({ x, y, size ->
+        // the path object
+        val path = Path()
+        // add a square into the path
+        path.addRect(x, y, x + size, y + size, Path.Direction.CW)
+        // return the path
+        path
+    });
+
+    // render a single star on the passed canvas using the passed paint
+    fun renderSingleStar(canvas: Canvas, paint: Paint, x: Float, y: Float, size: Float, valueColor: Int, baseColor: Int, valuedRatio: Float) {
+        // get the path whose shape is determined by each type
+        val path = getShapedPath(x, y, size)
+
+        // set to the base color
         paint.color = baseColor
+        // render the path as a star
         canvas.drawPath(path, paint)
-    }),
 
-    CIRCLE({ canvas, paint, x, y, size, valueColor, baseColor, valuedRatio ->
-        // set to the base color
-        paint.color = baseColor
-        // render a base circle
-        canvas.drawOval(x, y, x + size, y + size, paint)
-
-        if (valuedRatio > 0F) {
-            val valuedW = x + size * valuedRatio
-            val r = size / 2F
-            val cX = x + r
-            val theta = acos((valuedW - cX) / r)
-
-            val path = Path()
-            path.addArc(x,
-                y,
-                x + size,
-                y + size,
-                theta * 180F / PI.toFloat(),
-                360F - 2F * (theta * 180F / PI.toFloat())
-            )
-            // close the path
-            path.close()
-
-            // set to the value color
-            paint.color = valueColor
-            // render a value circle
-            canvas.drawPath(path, paint)
-        }
-    }),
-
-    SQUARE({ canvas, paint, x, y, size, valueColor, baseColor, valuedRatio ->
-        // set to the base color
-        paint.color = baseColor
-        // render a base square
-        canvas.drawRect(x, y, x + size, y + size, paint)
-
-        if (valuedRatio > 0F) {
-            // set to the value color
-            paint.color = valueColor
-            // render a value square
-            canvas.drawRect(x, y, x + size * valuedRatio, y + size, paint)
-        }
-    })
+        // set to the value color
+        paint.color = valueColor
+        // render the value star by the mask (xfermode)
+        val sc = canvas.saveLayer(x, y, x + size, y + size, null, Canvas.ALL_SAVE_FLAG)
+        canvas.drawPath(path, paint)
+        paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.DST_OUT)
+        canvas.drawRect(x + size * valuedRatio, y, x + size, y + size, paint)
+        paint.xfermode = null
+        canvas.restoreToCount(sc)
+    }
 }

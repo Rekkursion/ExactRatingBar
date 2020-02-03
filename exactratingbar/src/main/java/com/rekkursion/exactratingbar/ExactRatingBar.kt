@@ -139,7 +139,7 @@ class ExactRatingBar(context: Context, attrs: AttributeSet?): View(context, attr
         if (starSizeWithoutSpacing > 0F)
             for (idx in 0 until mNumOfStars) {
                 val valuedRatio = if (mValue > idx + 1F) 1F else if (mValue > idx) mValue - idx else 0F
-                starStyle.singleStarRenderFunc(canvas, mPaint, mStarSizeIncludesSpacing * idx + mSpacing, mSpacing, starSizeWithoutSpacing, mStarValueColor, mStarBaseColor, valuedRatio)
+                starStyle.renderSingleStar(canvas, mPaint, mStarSizeIncludesSpacing * idx + mSpacing, mSpacing, starSizeWithoutSpacing, mStarValueColor, mStarBaseColor, valuedRatio)
             }
     }
 }
