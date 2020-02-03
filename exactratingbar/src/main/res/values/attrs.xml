@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="ExactRatingBar">
+        <!-- the number of stars -->
+        <attr name="stars_num" format="integer" />
+        <!-- the default value of stars -->
+        <attr name="stars_value" format="float" />
+        <!-- the spacing of each star -->
+        <attr name="spacing" format="float" />
+        <!-- the style of stars -->
+        <attr name="star_style" format="enum">
+            <enum name="star" value="0" />
+            <enum name="circle" value="1" />
+            <enum name="square" value="2" />
+        </attr>
+        <!-- the scaled size of each star -->
+        <attr name="scaled_size" format="enum">
+            <enum name="small" value="0" />
+            <enum name="medium" value="1" />
+            <enum name="big" value="2" />
+        </attr>
+        <!-- the color of each valued star -->
+        <attr name="star_value_color" format="color" />
+        <!-- the color of each star's background -->
+        <attr name="star_base_color" format="color" />
+        <!-- the background color -->
+        <attr name="bg_color" format="color" />
+    </declare-styleable>
+</resources>
