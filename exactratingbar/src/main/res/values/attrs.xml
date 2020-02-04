@@ -5,6 +5,10 @@
         <attr name="stars_num" format="integer" />
         <!-- the default value of stars -->
         <attr name="stars_value" format="float" />
+        <!-- the minimum value of stars -->
+        <attr name="min_stars_value" format="float" />
+        <!-- the maximum value of stars -->
+        <attr name="max_stars_value" format="float" />
         <!-- gravity -->
         <attr name="gravity" format="flags">
             <flag name="top" value="1" />

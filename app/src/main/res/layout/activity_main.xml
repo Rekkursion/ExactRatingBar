@@ -23,6 +23,8 @@
             app:gravity="center"
             app:stars_num="5"
             app:stars_value="3.3"
+            app:min_stars_value="1"
+            app:max_stars_value="4.3"
             app:star_style="star"
             app:star_size="152.1"
             app:star_value_color="@color/colorAccent"

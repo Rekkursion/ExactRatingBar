@@ -18,7 +18,15 @@ class ExactRatingBar(context: Context, attrs: AttributeSet?): View(context, attr
 
     // the current value of stars
     private var mValue = 5F
-    var currentValue get() = mValue; set(value) { mValue = min(mNumOfStars.toFloat(), max(0F, value)); invalidate() }
+    var currentValue get() = mValue; set(value) { mValue = min(mMaxStarsValue, max(mMinStarsValue, value)); invalidate() }
+
+    // the minimum value of stars
+    private var mMinStarsValue = 0F
+    var minStarsValue get() = mMinStarsValue; set(value) { mMinStarsValue = value; invalidate() }
+
+    // the maximum value of stars
+    private var mMaxStarsValue = 5F
+    var maxStarsValue get() = mMaxStarsValue; set(value) { mMaxStarsValue = value; invalidate() }
 
     // the gravity's flag
     private var mGravityFlag = com.rekkursion.exactratingbar.Gravity.CENTER_HORIZONTAL.flag or com.rekkursion.exactratingbar.Gravity.CENTER_VERTICAL.flag
@@ -87,6 +95,8 @@ class ExactRatingBar(context: Context, attrs: AttributeSet?): View(context, attr
 
             mNumOfStars = max(1, ta.getInteger(R.styleable.ExactRatingBar_stars_num, 5))
             mValue = ta.getFloat(R.styleable.ExactRatingBar_stars_value, 5F)
+            mMinStarsValue = ta.getFloat(R.styleable.ExactRatingBar_min_stars_value, 0F)
+            mMaxStarsValue = ta.getFloat(R.styleable.ExactRatingBar_max_stars_value, 5F)
             mGravityFlag = ta.getInt(R.styleable.ExactRatingBar_gravity, com.rekkursion.exactratingbar.Gravity.CENTER_HORIZONTAL.flag or com.rekkursion.exactratingbar.Gravity.CENTER_VERTICAL.flag)
             mSpacing = ta.getFloat(R.styleable.ExactRatingBar_spacing, 10F)
             mStarStyleIndex = min(StarStyle.values().size - 1, max(0, ta.getInt(R.styleable.ExactRatingBar_star_style, 0)))
@@ -249,9 +259,9 @@ class ExactRatingBar(context: Context, attrs: AttributeSet?): View(context, attr
         val totalWidth = mStarSizeIncludesSpacing * mNumOfStars
 
         if (x <= leftMostOfStars)
-            return 0F
+            return max(0F, mMinStarsValue)
         else if (x >= leftMostOfStars + totalWidth)
-            return mNumOfStars.toFloat()
+            return min(mNumOfStars.toFloat(), mMaxStarsValue)
 
         var curW = leftMostOfStars + mSpacing
         var value = 0F
@@ -262,6 +272,10 @@ class ExactRatingBar(context: Context, attrs: AttributeSet?): View(context, attr
             curW += (mStarSizeIncludesSpacing - mSpacing * 2F) / 2F
             curW += mSpacing * 2F
         }
+
+        // bound the value
+        if (value < mMinStarsValue) value = mMinStarsValue
+        if (value > mMaxStarsValue) value = mMaxStarsValue
 
         return value
     }
