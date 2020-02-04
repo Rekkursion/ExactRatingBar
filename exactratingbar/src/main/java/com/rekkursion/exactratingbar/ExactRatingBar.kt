@@ -1,5 +1,6 @@
 package com.rekkursion.exactratingbar
 
+import android.app.AlertDialog
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
@@ -17,39 +18,39 @@ import kotlin.time.measureTimedValue
 class ExactRatingBar(context: Context, attrs: AttributeSet?): View(context, attrs) {
     // the number of stars
     private var mNumOfStars = 5
-    var numOfStars get() = mNumOfStars; set(value) { mNumOfStars = value }
+    var numOfStars get() = mNumOfStars; set(value) { mNumOfStars = value; invalidate() }
 
     // the current value of stars
     private var mValue = 5F
-    var currentValue get() = mValue; set(value) { mValue = value }
+    var currentValue get() = mValue; set(value) { mValue = value; invalidate() }
 
     // the gravity
     private var mGravity = com.rekkursion.exactratingbar.Gravity.CENTER_HORIZONTAL.flag or com.rekkursion.exactratingbar.Gravity.CENTER_VERTICAL.flag
-    var gravity get() = mGravity; set(value) { mGravity = value }
+    var gravity get() = mGravity; set(value) { mGravity = value; invalidate() }
 
     // the spacing of each star
     private var mSpacing = 10F
-    var spacing get() = mSpacing; set(value) { mSpacing = value }
+    var spacing get() = mSpacing; set(value) { mSpacing = value; invalidate() }
 
     // the index of the style of each star
     private var mStarStyleIndex = 0
-    var starStyle: StarStyle get() = StarStyle.values()[mStarStyleIndex]; set(value) { mStarStyleIndex = value.ordinal }
+    var starStyle: StarStyle get() = StarStyle.values()[mStarStyleIndex]; set(value) { mStarStyleIndex = value.ordinal; invalidate() }
 
     // the rendering size of each star which includes the spacings
     private var mStarSizeIncludesSpacing = 100F
-    var starSize get() = mStarSizeIncludesSpacing; set(value) { mStarSizeIncludesSpacing = value }
+    var starSize get() = mStarSizeIncludesSpacing; set(value) { mStarSizeIncludesSpacing = value; invalidate() }
 
     // the color of each valued star
     private var mStarValueColor = Color.RED
-    var starValueColor get() = mStarValueColor; set(value) { mStarValueColor = value }
+    var starValueColor get() = mStarValueColor; set(value) { mStarValueColor = value; invalidate() }
 
     // the color of each star's base
     private var mStarBaseColor = Color.DKGRAY
-    var starBaseColor get() = mStarBaseColor; set(value) { mStarBaseColor = value }
+    var starBaseColor get() = mStarBaseColor; set(value) { mStarBaseColor = value; invalidate() }
 
     // the background color
     private var mBgColor = Color.TRANSPARENT
-    var bgColor get() = mBgColor; set(value) { mBgColor = value }
+    var bgColor get() = mBgColor; set(value) { mBgColor = value; invalidate() }
 
     // the paint for rendering
     private val mPaint = Paint()
@@ -59,13 +60,19 @@ class ExactRatingBar(context: Context, attrs: AttributeSet?): View(context, attr
 
     // the default on-touch-listener
     private val mDefaultOnTouchListener = OnTouchListener { _, motionEvent ->
-        if (motionEvent.action == MotionEvent.ACTION_DOWN) {
+        if (motionEvent.action == MotionEvent.ACTION_UP) {
             val newValue = getRatingValueByViewX(motionEvent.x)
             if (mOnValueChangedListener?.onValueChanged(mValue, newValue) == true) {
                 mValue = newValue
                 invalidate()
             }
         }
+        false
+    }
+
+    // the default on-long-click-listener
+    private val mDefaultOnLongClickListener = OnLongClickListener {
+        // TODO: default on-long-click-listener
         false
     }
 
@@ -142,7 +149,7 @@ class ExactRatingBar(context: Context, attrs: AttributeSet?): View(context, attr
         }
     }
 
-    // override the set-on-touch-listener
+    // override the set-on-touch-listener to do the default listener
     override fun setOnTouchListener(l: OnTouchListener?) {
         val onTouchListener = OnTouchListener { p0, p1 ->
             val defaultReturnValue = mDefaultOnTouchListener.onTouch(p0, p1)
@@ -151,12 +158,24 @@ class ExactRatingBar(context: Context, attrs: AttributeSet?): View(context, attr
         super.setOnTouchListener(onTouchListener)
     }
 
+    // override the set-on-long-click-listener to do the default listener
+    override fun setOnLongClickListener(l: OnLongClickListener?) {
+        val onLongClickListener = OnLongClickListener {
+            val defaultReturnValue = mDefaultOnLongClickListener.onLongClick(it)
+            l?.onLongClick(it) ?: defaultReturnValue
+        }
+        super.setOnLongClickListener(onLongClickListener)
+    }
+
     /* ============================================================ */
 
     // initialize events
     private fun initEvents() {
         // the touch event
         setOnTouchListener(mDefaultOnTouchListener)
+
+        // the long-click event
+        setOnLongClickListener(mDefaultOnLongClickListener)
 
         // the default on-value-changed-listener
         setOnValueChangedListener(object: OnValueChangedListener { override fun onValueChanged(oldValue: Float, newValue: Float): Boolean { return true } })
