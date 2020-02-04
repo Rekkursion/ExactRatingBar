@@ -6,7 +6,15 @@
         <!-- the default value of stars -->
         <attr name="stars_value" format="float" />
         <!-- gravity -->
-        <attr name="android:gravity" />
+        <attr name="gravity" format="flags">
+            <flag name="top" value="1" />
+            <flag name="center_vertical" value="2" />
+            <flag name="bottom" value="4" />
+            <flag name="left" value="8" />
+            <flag name="center_horizontal" value="16" />
+            <flag name="right" value="32" />
+            <flag name="center" value="18" />
+        </attr>
         <!-- the spacing of each star -->
         <attr name="spacing" format="float" />
         <!-- the style of stars -->
@@ -21,10 +29,10 @@
         <!-- the rendering size of each star -->
         <attr name="star_size" format="float" />
         <!-- the color of each valued star -->
-        <attr name="star_value_color" format="color" />
+        <attr name="star_value_color" format="reference|color" />
         <!-- the color of each star's background -->
-        <attr name="star_base_color" format="color" />
+        <attr name="star_base_color" format="reference|color" />
         <!-- the background color -->
-        <attr name="bg_color" format="color" />
+        <attr name="bg_color" format="reference|color" />
     </declare-styleable>
 </resources>

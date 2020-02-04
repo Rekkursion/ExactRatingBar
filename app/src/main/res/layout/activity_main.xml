@@ -12,13 +12,14 @@
             android:id="@+id/erb"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:gravity="center"
-            app:stars_num="5"
-            app:stars_value="3.51"
-            app:star_style="star"
-            app:star_size="102.1"
+            android:layout_gravity="center"
+            app:gravity="center"
+            app:stars_num="6"
+            app:stars_value="5.51"
+            app:star_style="triangle"
+            app:star_size="132.1"
             app:star_value_color="@color/colorAccent"
-            app:star_base_color="@android:color/darker_gray"
+            app:star_base_color="@android:color/black"
             app:bg_color="@color/colorPrimary"
-            app:spacing="10.5" />
+            app:spacing="16.5" />
 </androidx.appcompat.widget.LinearLayoutCompat>

@@ -4,9 +4,13 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
+import android.graphics.PointF
 import android.util.AttributeSet
+import android.util.Log
 import android.view.Gravity
 import android.view.View
+import kotlin.math.max
+import kotlin.math.min
 
 class ExactRatingBar(context: Context, attrs: AttributeSet?): View(context, attrs) {
     // the number of stars
@@ -14,24 +18,24 @@ class ExactRatingBar(context: Context, attrs: AttributeSet?): View(context, attr
     var numOfStars get() = mNumOfStars; set(value) { mNumOfStars = value }
 
     // the current value of stars
-    private var mValue = mNumOfStars.toFloat()
+    private var mValue = 5F
     var currentValue get() = mValue; set(value) { mValue = value }
 
     // the gravity
-    private var mGravity = Gravity.CENTER
+    private var mGravity = com.rekkursion.exactratingbar.Gravity.CENTER_HORIZONTAL.flag or com.rekkursion.exactratingbar.Gravity.CENTER_VERTICAL.flag
     var gravity get() = mGravity; set(value) { mGravity = value }
 
     // the spacing of each star
-    private var mSpacing = 0F
+    private var mSpacing = 10F
     var spacing get() = mSpacing; set(value) { mSpacing = value }
 
     // the index of the style of each star
     private var mStarStyleIndex = 0
     var starStyle: StarStyle get() = StarStyle.values()[mStarStyleIndex]; set(value) { mStarStyleIndex = value.ordinal }
 
-    // the rendering size of each star
-    private var mStarSize = 0F
-    var starSize get() = mStarSize; set(value) { mStarSize = value }
+    // the rendering size of each star which includes the spacings
+    private var mStarSizeIncludesSpacing = 100F
+    var starSize get() = mStarSizeIncludesSpacing; set(value) { mStarSizeIncludesSpacing = value }
 
     // the color of each valued star
     private var mStarValueColor = Color.RED
@@ -45,9 +49,6 @@ class ExactRatingBar(context: Context, attrs: AttributeSet?): View(context, attr
     private var mBgColor = Color.TRANSPARENT
     var bgColor get() = mBgColor; set(value) { mBgColor = value }
 
-    // the rendering-size of each star, including the spacing
-    private var mStarSizeIncludesSpacing = 0F
-
     // the paint for rendering
     private val mPaint = Paint()
 
@@ -59,13 +60,13 @@ class ExactRatingBar(context: Context, attrs: AttributeSet?): View(context, attr
         attrs?.let {
             val ta = context.obtainStyledAttributes(attrs, R.styleable.ExactRatingBar)
 
-            mNumOfStars = ta.getInteger(R.styleable.ExactRatingBar_stars_num, 5)
+            mNumOfStars = max(1, ta.getInteger(R.styleable.ExactRatingBar_stars_num, 5))
             mValue = ta.getFloat(R.styleable.ExactRatingBar_stars_value, 5F)
-            mGravity = ta.getInt(R.styleable.ExactRatingBar_android_gravity, Gravity.CENTER)
+            mGravity = ta.getInt(R.styleable.ExactRatingBar_gravity, com.rekkursion.exactratingbar.Gravity.CENTER_HORIZONTAL.flag or com.rekkursion.exactratingbar.Gravity.CENTER_VERTICAL.flag)
             mSpacing = ta.getFloat(R.styleable.ExactRatingBar_spacing, 10F)
-            mStarStyleIndex = ta.getInt(R.styleable.ExactRatingBar_star_style, 0)
-            mStarSize = ta.getFloat(R.styleable.ExactRatingBar_star_size, 100F)
-            mStarValueColor = ta.getColor(R.styleable.ExactRatingBar_star_value_color, Color.BLACK)
+            mStarStyleIndex = min(StarStyle.values().size - 1, max(0, ta.getInt(R.styleable.ExactRatingBar_star_style, 0)))
+            mStarSizeIncludesSpacing = max(0F, ta.getFloat(R.styleable.ExactRatingBar_star_size, 100F))
+            mStarValueColor = ta.getColor(R.styleable.ExactRatingBar_star_value_color, Color.RED)
             mStarBaseColor = ta.getColor(R.styleable.ExactRatingBar_star_base_color, Color.DKGRAY)
             mBgColor = ta.getColor(R.styleable.ExactRatingBar_bg_color, Color.TRANSPARENT)
 
@@ -85,7 +86,7 @@ class ExactRatingBar(context: Context, attrs: AttributeSet?): View(context, attr
             // match_parent or exact value given
             MeasureSpec.EXACTLY -> specHeight
             // wrap_content
-            MeasureSpec.AT_MOST -> starSize.toInt()
+            MeasureSpec.AT_MOST -> mStarSizeIncludesSpacing.toInt()
             // unspecified
             else -> suggestedMinimumHeight + paddingTop + paddingBottom
         }
@@ -95,22 +96,11 @@ class ExactRatingBar(context: Context, attrs: AttributeSet?): View(context, attr
             // match_parent or exact value given
             MeasureSpec.EXACTLY -> specWidth
             // wrap_content
-            MeasureSpec.AT_MOST -> starSize.toInt() * mNumOfStars
+            MeasureSpec.AT_MOST -> mStarSizeIncludesSpacing.toInt() * mNumOfStars
             // unspecified
             else -> suggestedMinimumWidth + paddingLeft + paddingRight
         }
         setMeasuredDimension(desiredWidth, desiredHeight)
-    }
-
-    // specify the layout
-    override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
-        super.onLayout(changed, left, top, right, bottom)
-
-        mStarSizeIncludesSpacing =
-            if (width < height || height.toFloat() * mNumOfStars >= width)
-                width / mNumOfStars.toFloat()
-            else
-                height.toFloat()
     }
 
     // render
@@ -143,10 +133,40 @@ class ExactRatingBar(context: Context, attrs: AttributeSet?): View(context, attr
         val starSizeWithoutSpacing = mStarSizeIncludesSpacing - doubledSpacing
 
         // render stars only if the size is bigger than zero
-        if (starSizeWithoutSpacing > 0F)
+        if (starSizeWithoutSpacing > 0F) {
+            val upLeftCornerOfFirstStar = getUpLeftCornerOfFirstStar()
             for (idx in 0 until mNumOfStars) {
                 val valuedRatio = if (mValue > idx + 1F) 1F else if (mValue > idx) mValue - idx else 0F
-                starStyle.renderSingleStar(canvas, mPaint, mStarSizeIncludesSpacing * idx + mSpacing, mSpacing, starSizeWithoutSpacing, mStarValueColor, mStarBaseColor, valuedRatio)
+                starStyle.renderSingleStar(
+                    canvas,
+                    mPaint,
+                    mStarSizeIncludesSpacing * idx + mSpacing + upLeftCornerOfFirstStar.x,
+                    mSpacing + upLeftCornerOfFirstStar.y,
+                    starSizeWithoutSpacing,
+                    mStarValueColor,
+                    mStarBaseColor,
+                    valuedRatio
+                )
             }
+        }
+    }
+
+    // get the up-left corner of the first star to position all of stars
+    private fun getUpLeftCornerOfFirstStar(): PointF {
+        // 1: top, 2: cen_vert, 4: bottom
+        // 8: left, 16, cen_hori, 32: right
+        var x = 0F; var y = 0F
+        var flag = mGravity
+        for (g in com.rekkursion.exactratingbar.Gravity.values().reversed()) {
+            if (flag >= g.flag) {
+                flag -= g.flag
+                if (g.flag == 1 || g.flag == 2 || g.flag == 4)
+                    y = g.getPosition(width.toFloat(), height.toFloat(), mNumOfStars, mStarSizeIncludesSpacing)
+                else
+                    x = g.getPosition(width.toFloat(), height.toFloat(), mNumOfStars, mStarSizeIncludesSpacing)
+            }
+        }
+
+        return PointF(x, y)
     }
 }
