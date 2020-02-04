@@ -8,9 +8,11 @@ import android.graphics.PointF
 import android.util.AttributeSet
 import android.util.Log
 import android.view.Gravity
+import android.view.MotionEvent
 import android.view.View
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.time.measureTimedValue
 
 class ExactRatingBar(context: Context, attrs: AttributeSet?): View(context, attrs) {
     // the number of stars
@@ -52,6 +54,21 @@ class ExactRatingBar(context: Context, attrs: AttributeSet?): View(context, attr
     // the paint for rendering
     private val mPaint = Paint()
 
+    // the listener when the value has been changed
+    private var mOnValueChangedListener: OnValueChangedListener? = null
+
+    // the default on-touch-listener
+    private val mDefaultOnTouchListener = OnTouchListener { _, motionEvent ->
+        if (motionEvent.action == MotionEvent.ACTION_DOWN) {
+            val newValue = getRatingValueByViewX(motionEvent.x)
+            if (mOnValueChangedListener?.onValueChanged(mValue, newValue) == true) {
+                mValue = newValue
+                invalidate()
+            }
+        }
+        false
+    }
+
     /* ============================================================ */
 
     // primary constructor
@@ -72,10 +89,20 @@ class ExactRatingBar(context: Context, attrs: AttributeSet?): View(context, attr
 
             ta.recycle()
         }
+
+        // initialize the events
+        initEvents()
     }
 
     // secondary constructor
     constructor(context: Context): this(context, null)
+
+    /* ============================================================ */
+
+    // set the listener for listening the value's change
+    fun setOnValueChangedListener(onValueChangedListener: OnValueChangedListener) {
+        mOnValueChangedListener = onValueChangedListener
+    }
 
     /* ============================================================ */
 
@@ -115,7 +142,25 @@ class ExactRatingBar(context: Context, attrs: AttributeSet?): View(context, attr
         }
     }
 
+    // override the set-on-touch-listener
+    override fun setOnTouchListener(l: OnTouchListener?) {
+        val onTouchListener = OnTouchListener { p0, p1 ->
+            val defaultReturnValue = mDefaultOnTouchListener.onTouch(p0, p1)
+            l?.onTouch(p0, p1) ?: defaultReturnValue
+        }
+        super.setOnTouchListener(onTouchListener)
+    }
+
     /* ============================================================ */
+
+    // initialize events
+    private fun initEvents() {
+        // the touch event
+        setOnTouchListener(mDefaultOnTouchListener)
+
+        // the default on-value-changed-listener
+        setOnValueChangedListener(object: OnValueChangedListener { override fun onValueChanged(oldValue: Float, newValue: Float): Boolean { return true } })
+    }
 
     // render the stars
     private fun renderStars(canvas: Canvas) {
@@ -168,5 +213,28 @@ class ExactRatingBar(context: Context, attrs: AttributeSet?): View(context, attr
         }
 
         return PointF(x, y)
+    }
+
+    // get the value of the exact-rating-bar by a certain x-axis value
+    private fun getRatingValueByViewX(x: Float): Float {
+        val leftMostOfStars = getUpLeftCornerOfFirstStar().x
+        val totalWidth = mStarSizeIncludesSpacing * mNumOfStars
+
+        if (x <= leftMostOfStars)
+            return 0F
+        else if (x >= leftMostOfStars + totalWidth)
+            return mNumOfStars.toFloat()
+
+        var curW = leftMostOfStars + mSpacing
+        var value = 0F
+        for (starValue in 1..mNumOfStars) {
+            if (x >= curW) value += 0.5F
+            curW += (mStarSizeIncludesSpacing - mSpacing * 2F) / 2F
+            if (x >= curW) value += 0.5F
+            curW += (mStarSizeIncludesSpacing - mSpacing * 2F) / 2F
+            curW += mSpacing * 2F
+        }
+
+        return value
     }
 }
