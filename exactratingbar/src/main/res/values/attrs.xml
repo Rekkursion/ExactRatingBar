@@ -32,6 +32,8 @@
         <attr name="star_value_color" format="reference|color" />
         <!-- the color of each star's background -->
         <attr name="star_base_color" format="reference|color" />
+        <!-- the color of each star's background when pressing down -->
+        <attr name="star_base_pressed_color" format="reference|color" />
         <!-- the background color -->
         <attr name="bg_color" format="reference|color" />
     </declare-styleable>

@@ -8,10 +8,17 @@
         android:layout_height="match_parent"
         tools:context=".MainActivity">
 
+    <androidx.appcompat.widget.AppCompatRatingBar
+            android:id="@+id/rb"
+            android:numStars="5"
+            android:rating="3.3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
     <com.rekkursion.exactratingbar.ExactRatingBar
             android:id="@+id/erb"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_gravity="center"
             app:gravity="center"
             app:stars_num="5"
@@ -20,6 +27,7 @@
             app:star_size="152.1"
             app:star_value_color="@color/colorAccent"
             app:star_base_color="@android:color/darker_gray"
-            app:bg_color="@color/colorPrimary"
+            app:star_base_pressed_color="#77F4AC92"
+            app:bg_color="@android:color/transparent"
             app:spacing="16.5" />
 </androidx.appcompat.widget.LinearLayoutCompat>

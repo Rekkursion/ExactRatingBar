@@ -18,7 +18,7 @@ class ExactRatingBar(context: Context, attrs: AttributeSet?): View(context, attr
 
     // the current value of stars
     private var mValue = 5F
-    var currentValue get() = mValue; set(value) { mValue = value; invalidate() }
+    var currentValue get() = mValue; set(value) { mValue = min(mNumOfStars.toFloat(), max(0F, value)); invalidate() }
 
     // the gravity's flag
     private var mGravityFlag = com.rekkursion.exactratingbar.Gravity.CENTER_HORIZONTAL.flag or com.rekkursion.exactratingbar.Gravity.CENTER_VERTICAL.flag
@@ -36,12 +36,16 @@ class ExactRatingBar(context: Context, attrs: AttributeSet?): View(context, attr
     var starSize get() = mStarSizeIncludesSpacing; set(value) { mStarSizeIncludesSpacing = value; invalidate() }
 
     // the color of each valued star
-    private var mStarValueColor = Color.RED
+    private var mStarValueColor = Color.parseColor("#F88B30")
     var starValueColor get() = mStarValueColor; set(value) { mStarValueColor = value; invalidate() }
 
     // the color of each star's base
-    private var mStarBaseColor = Color.DKGRAY
+    private var mStarBaseColor = Color.LTGRAY
     var starBaseColor get() = mStarBaseColor; set(value) { mStarBaseColor = value; invalidate() }
+
+    // the color of each star's base when pressing down
+    private var mStarBasePressedColor = Color.parseColor("#77F4AC92")
+    var starBasePressedColor get() = mStarBasePressedColor; set(value) { mStarBasePressedColor = value; invalidate() }
 
     // the background color
     private var mBgColor = Color.TRANSPARENT
@@ -53,23 +57,25 @@ class ExactRatingBar(context: Context, attrs: AttributeSet?): View(context, attr
     // the listener when the value has been changed
     private var mOnValueChangedListener: OnValueChangedListener? = null
 
+    // check if the finger is touched
+    private var mIsTouched = false
+
     // the default on-touch-listener
     private val mDefaultOnTouchListener = OnTouchListener { _, motionEvent ->
-        if (motionEvent.action == MotionEvent.ACTION_UP) {
-            val newValue = getRatingValueByViewX(motionEvent.x)
-            if (mOnValueChangedListener?.onValueChanged(mValue, newValue) == true) {
-                mValue = newValue
-                invalidate()
-            }
+        when (motionEvent.action) {
+            MotionEvent.ACTION_DOWN -> mIsTouched = true
+            MotionEvent.ACTION_UP -> mIsTouched = false
         }
+
+        val newValue = getRatingValueByViewX(motionEvent.x)
+        if (mOnValueChangedListener?.onValueChanged(mValue, newValue) == true) mValue = newValue
+
+        invalidate()
         false
     }
 
     // the default on-long-click-listener
-    private val mDefaultOnLongClickListener = OnLongClickListener {
-        // TODO: default on-long-click-listener
-        false
-    }
+    private val mDefaultOnLongClickListener = OnLongClickListener { true }
 
     /* ============================================================ */
 
@@ -85,8 +91,9 @@ class ExactRatingBar(context: Context, attrs: AttributeSet?): View(context, attr
             mSpacing = ta.getFloat(R.styleable.ExactRatingBar_spacing, 10F)
             mStarStyleIndex = min(StarStyle.values().size - 1, max(0, ta.getInt(R.styleable.ExactRatingBar_star_style, 0)))
             mStarSizeIncludesSpacing = max(0F, ta.getFloat(R.styleable.ExactRatingBar_star_size, 100F))
-            mStarValueColor = ta.getColor(R.styleable.ExactRatingBar_star_value_color, Color.RED)
-            mStarBaseColor = ta.getColor(R.styleable.ExactRatingBar_star_base_color, Color.DKGRAY)
+            mStarValueColor = ta.getColor(R.styleable.ExactRatingBar_star_value_color, Color.parseColor("#F88B30"))
+            mStarBaseColor = ta.getColor(R.styleable.ExactRatingBar_star_base_color, Color.LTGRAY)
+            mStarBasePressedColor = ta.getColor(R.styleable.ExactRatingBar_star_base_pressed_color, Color.parseColor("#77F4AC92"))
             mBgColor = ta.getColor(R.styleable.ExactRatingBar_bg_color, Color.TRANSPARENT)
 
             ta.recycle()
@@ -174,10 +181,10 @@ class ExactRatingBar(context: Context, attrs: AttributeSet?): View(context, attr
     // initialize events
     private fun initEvents() {
         // the touch event
-        setOnTouchListener(mDefaultOnTouchListener)
+        super.setOnTouchListener(mDefaultOnTouchListener)
 
         // the long-click event
-        setOnLongClickListener(mDefaultOnLongClickListener)
+        super.setOnLongClickListener(mDefaultOnLongClickListener)
 
         // the default on-value-changed-listener
         setOnValueChangedListener(object: OnValueChangedListener { override fun onValueChanged(oldValue: Float, newValue: Float): Boolean { return true } })
@@ -210,7 +217,7 @@ class ExactRatingBar(context: Context, attrs: AttributeSet?): View(context, attr
                     mSpacing + upLeftCornerOfFirstStar.y,
                     starSizeWithoutSpacing,
                     mStarValueColor,
-                    mStarBaseColor,
+                    if (mIsTouched) mStarBasePressedColor else mStarBaseColor,
                     valuedRatio
                 )
             }
