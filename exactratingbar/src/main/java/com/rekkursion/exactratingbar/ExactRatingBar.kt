@@ -12,6 +12,10 @@ import kotlin.math.max
 import kotlin.math.min
 
 class ExactRatingBar(context: Context, attrs: AttributeSet?): View(context, attrs) {
+    // could the value be altered or not
+    private var mAlterable = true
+    var alterable get() = mAlterable; set(value) { mAlterable = value; invalidate() }
+
     // the number of stars
     private var mNumOfStars = 5
     var numOfStars get() = mNumOfStars; set(value) { mNumOfStars = value; invalidate() }
@@ -70,15 +74,17 @@ class ExactRatingBar(context: Context, attrs: AttributeSet?): View(context, attr
 
     // the default on-touch-listener
     private val mDefaultOnTouchListener = OnTouchListener { _, motionEvent ->
-        when (motionEvent.action) {
-            MotionEvent.ACTION_DOWN -> mIsTouched = true
-            MotionEvent.ACTION_UP -> mIsTouched = false
+        if (alterable) {
+            when (motionEvent.action) {
+                MotionEvent.ACTION_DOWN -> mIsTouched = true
+                MotionEvent.ACTION_UP -> mIsTouched = false
+            }
+
+            val newValue = getRatingValueByViewX(motionEvent.x)
+            if (mOnValueChangedListener?.onValueChanged(mValue, newValue) == true) mValue = newValue
+
+            invalidate()
         }
-
-        val newValue = getRatingValueByViewX(motionEvent.x)
-        if (mOnValueChangedListener?.onValueChanged(mValue, newValue) == true) mValue = newValue
-
-        invalidate()
         false
     }
 
@@ -93,6 +99,7 @@ class ExactRatingBar(context: Context, attrs: AttributeSet?): View(context, attr
         attrs?.let {
             val ta = context.obtainStyledAttributes(attrs, R.styleable.ExactRatingBar)
 
+            mAlterable = ta.getBoolean(R.styleable.ExactRatingBar_alterable, true)
             mNumOfStars = max(1, ta.getInteger(R.styleable.ExactRatingBar_stars_num, 5))
             mValue = ta.getFloat(R.styleable.ExactRatingBar_stars_value, 5F)
             mMinStarsValue = ta.getFloat(R.styleable.ExactRatingBar_min_stars_value, 0F)

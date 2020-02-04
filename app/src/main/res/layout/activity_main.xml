@@ -20,6 +20,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
+            app:alterable="false"
             app:gravity="center"
             app:stars_num="5"
             app:stars_value="3.3"
