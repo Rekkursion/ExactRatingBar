@@ -1,19 +1,15 @@
 package com.rekkursion.exactratingbar
 
-import android.app.AlertDialog
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.PointF
 import android.util.AttributeSet
-import android.util.Log
-import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
 import kotlin.math.max
 import kotlin.math.min
-import kotlin.time.measureTimedValue
 
 class ExactRatingBar(context: Context, attrs: AttributeSet?): View(context, attrs) {
     // the number of stars
@@ -24,9 +20,8 @@ class ExactRatingBar(context: Context, attrs: AttributeSet?): View(context, attr
     private var mValue = 5F
     var currentValue get() = mValue; set(value) { mValue = value; invalidate() }
 
-    // the gravity
-    private var mGravity = com.rekkursion.exactratingbar.Gravity.CENTER_HORIZONTAL.flag or com.rekkursion.exactratingbar.Gravity.CENTER_VERTICAL.flag
-    var gravity get() = mGravity; set(value) { mGravity = value; invalidate() }
+    // the gravity's flag
+    private var mGravityFlag = com.rekkursion.exactratingbar.Gravity.CENTER_HORIZONTAL.flag or com.rekkursion.exactratingbar.Gravity.CENTER_VERTICAL.flag
 
     // the spacing of each star
     private var mSpacing = 10F
@@ -86,7 +81,7 @@ class ExactRatingBar(context: Context, attrs: AttributeSet?): View(context, attr
 
             mNumOfStars = max(1, ta.getInteger(R.styleable.ExactRatingBar_stars_num, 5))
             mValue = ta.getFloat(R.styleable.ExactRatingBar_stars_value, 5F)
-            mGravity = ta.getInt(R.styleable.ExactRatingBar_gravity, com.rekkursion.exactratingbar.Gravity.CENTER_HORIZONTAL.flag or com.rekkursion.exactratingbar.Gravity.CENTER_VERTICAL.flag)
+            mGravityFlag = ta.getInt(R.styleable.ExactRatingBar_gravity, com.rekkursion.exactratingbar.Gravity.CENTER_HORIZONTAL.flag or com.rekkursion.exactratingbar.Gravity.CENTER_VERTICAL.flag)
             mSpacing = ta.getFloat(R.styleable.ExactRatingBar_spacing, 10F)
             mStarStyleIndex = min(StarStyle.values().size - 1, max(0, ta.getInt(R.styleable.ExactRatingBar_star_style, 0)))
             mStarSizeIncludesSpacing = max(0F, ta.getFloat(R.styleable.ExactRatingBar_star_size, 100F))
@@ -109,6 +104,13 @@ class ExactRatingBar(context: Context, attrs: AttributeSet?): View(context, attr
     // set the listener for listening the value's change
     fun setOnValueChangedListener(onValueChangedListener: OnValueChangedListener) {
         mOnValueChangedListener = onValueChangedListener
+    }
+
+    // set the gravity by
+    fun setGravity(vararg gravities: Gravity) {
+        var flagValue = 0
+        gravities.forEach { flagValue += it.flag }
+        mGravityFlag = flagValue
     }
 
     /* ============================================================ */
@@ -220,7 +222,7 @@ class ExactRatingBar(context: Context, attrs: AttributeSet?): View(context, attr
         // 1: top, 2: cen_vert, 4: bottom
         // 8: left, 16, cen_hori, 32: right
         var x = 0F; var y = 0F
-        var flag = mGravity
+        var flag = mGravityFlag
         for (g in com.rekkursion.exactratingbar.Gravity.values().reversed()) {
             if (flag >= g.flag) {
                 flag -= g.flag
