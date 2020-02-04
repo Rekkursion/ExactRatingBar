@@ -11,13 +11,14 @@
     <com.rekkursion.exactratingbar.ExactRatingBar
             android:id="@+id/erb"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center"
             app:stars_num="5"
             app:stars_value="3.51"
-            app:star_style="square"
-            app:scaled_size="big"
+            app:star_style="star"
+            app:star_size="102.1"
             app:star_value_color="@color/colorAccent"
             app:star_base_color="@android:color/darker_gray"
             app:bg_color="@color/colorPrimary"
-            app:spacing="0" />
+            app:spacing="10.5" />
 </androidx.appcompat.widget.LinearLayoutCompat>

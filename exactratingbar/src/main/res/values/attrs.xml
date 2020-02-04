@@ -5,6 +5,8 @@
         <attr name="stars_num" format="integer" />
         <!-- the default value of stars -->
         <attr name="stars_value" format="float" />
+        <!-- gravity -->
+        <attr name="android:gravity" />
         <!-- the spacing of each star -->
         <attr name="spacing" format="float" />
         <!-- the style of stars -->
@@ -16,12 +18,8 @@
             <enum name="rhombus" value="4" />
             <enum name="diamond" value="5" />
         </attr>
-        <!-- the scaled size of each star -->
-        <attr name="scaled_size" format="enum">
-            <enum name="small" value="0" />
-            <enum name="medium" value="1" />
-            <enum name="big" value="2" />
-        </attr>
+        <!-- the rendering size of each star -->
+        <attr name="star_size" format="float" />
         <!-- the color of each valued star -->
         <attr name="star_value_color" format="color" />
         <!-- the color of each star's background -->

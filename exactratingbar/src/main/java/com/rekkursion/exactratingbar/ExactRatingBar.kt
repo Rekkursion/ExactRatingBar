@@ -5,41 +5,45 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.util.AttributeSet
-import android.util.Log
+import android.view.Gravity
 import android.view.View
-import kotlin.math.max
 
 class ExactRatingBar(context: Context, attrs: AttributeSet?): View(context, attrs) {
-    companion object {
-        // the scaled size of each star
-        enum class ScaledSize(val renderingSize: Int) {
-            SMALL(50), MEDIUM(75), BIG(100)
-        }
-    }
-
     // the number of stars
     private var mNumOfStars = 5
+    var numOfStars get() = mNumOfStars; set(value) { mNumOfStars = value }
 
     // the current value of stars
     private var mValue = mNumOfStars.toFloat()
+    var currentValue get() = mValue; set(value) { mValue = value }
+
+    // the gravity
+    private var mGravity = Gravity.CENTER
+    var gravity get() = mGravity; set(value) { mGravity = value }
 
     // the spacing of each star
     private var mSpacing = 0F
+    var spacing get() = mSpacing; set(value) { mSpacing = value }
 
     // the index of the style of each star
     private var mStarStyleIndex = 0
+    var starStyle: StarStyle get() = StarStyle.values()[mStarStyleIndex]; set(value) { mStarStyleIndex = value.ordinal }
 
-    // the index of the scaled-size enumerate class
-    private var mScaledSizeIndex = 0
+    // the rendering size of each star
+    private var mStarSize = 0F
+    var starSize get() = mStarSize; set(value) { mStarSize = value }
 
     // the color of each valued star
     private var mStarValueColor = Color.RED
+    var starValueColor get() = mStarValueColor; set(value) { mStarValueColor = value }
 
     // the color of each star's base
     private var mStarBaseColor = Color.DKGRAY
+    var starBaseColor get() = mStarBaseColor; set(value) { mStarBaseColor = value }
 
     // the background color
     private var mBgColor = Color.TRANSPARENT
+    var bgColor get() = mBgColor; set(value) { mBgColor = value }
 
     // the rendering-size of each star, including the spacing
     private var mStarSizeIncludesSpacing = 0F
@@ -57,9 +61,10 @@ class ExactRatingBar(context: Context, attrs: AttributeSet?): View(context, attr
 
             mNumOfStars = ta.getInteger(R.styleable.ExactRatingBar_stars_num, 5)
             mValue = ta.getFloat(R.styleable.ExactRatingBar_stars_value, 5F)
+            mGravity = ta.getInt(R.styleable.ExactRatingBar_android_gravity, Gravity.CENTER)
             mSpacing = ta.getFloat(R.styleable.ExactRatingBar_spacing, 10F)
             mStarStyleIndex = ta.getInt(R.styleable.ExactRatingBar_star_style, 0)
-            mScaledSizeIndex = ta.getInt(R.styleable.ExactRatingBar_scaled_size, 1)
+            mStarSize = ta.getFloat(R.styleable.ExactRatingBar_star_size, 100F)
             mStarValueColor = ta.getColor(R.styleable.ExactRatingBar_star_value_color, Color.BLACK)
             mStarBaseColor = ta.getColor(R.styleable.ExactRatingBar_star_base_color, Color.DKGRAY)
             mBgColor = ta.getColor(R.styleable.ExactRatingBar_bg_color, Color.TRANSPARENT)
@@ -75,24 +80,25 @@ class ExactRatingBar(context: Context, attrs: AttributeSet?): View(context, attr
 
     // measure the sizes
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        val desiredWidth = max(
-            suggestedMinimumWidth + paddingLeft + paddingRight,
-            MeasureSpec.getSize(widthMeasureSpec)
-        )
-
         val specHeight = MeasureSpec.getSize(heightMeasureSpec)
         val desiredHeight = when (MeasureSpec.getMode(heightMeasureSpec)) {
             // match_parent or exact value given
             MeasureSpec.EXACTLY -> specHeight
             // wrap_content
-            MeasureSpec.AT_MOST -> ScaledSize.values()[mScaledSizeIndex].renderingSize
+            MeasureSpec.AT_MOST -> starSize.toInt()
             // unspecified
             else -> suggestedMinimumHeight + paddingTop + paddingBottom
         }
 
-        Log.e("a", (suggestedMinimumHeight + paddingTop + paddingBottom).toString())
-        Log.e("c", (MeasureSpec.getSize(heightMeasureSpec)).toString())
-
+        val specWidth = MeasureSpec.getSize(widthMeasureSpec)
+        val desiredWidth = when (MeasureSpec.getMode(widthMeasureSpec)) {
+            // match_parent or exact value given
+            MeasureSpec.EXACTLY -> specWidth
+            // wrap_content
+            MeasureSpec.AT_MOST -> starSize.toInt() * mNumOfStars
+            // unspecified
+            else -> suggestedMinimumWidth + paddingLeft + paddingRight
+        }
         setMeasuredDimension(desiredWidth, desiredHeight)
     }
 
@@ -121,6 +127,7 @@ class ExactRatingBar(context: Context, attrs: AttributeSet?): View(context, attr
 
     /* ============================================================ */
 
+    // render the stars
     private fun renderStars(canvas: Canvas) {
         // get the enumerate type of the star-style
         val starStyle = StarStyle.values()[mStarStyleIndex]
