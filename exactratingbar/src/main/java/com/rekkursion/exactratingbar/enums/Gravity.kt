@@ -1,4 +1,4 @@
-package com.rekkursion.exactratingbar
+package com.rekkursion.exactratingbar.enums
 
 enum class Gravity(val flag: Int, val getPosition: (viewWidth: Float, viewHeight: Float, numOfStars: Int, starSize: Float) -> Float) {
     TOP(1, { _, _, _, _ -> 0F }),

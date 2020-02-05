@@ -1,6 +1,7 @@
-package com.rekkursion.exactratingbar
+package com.rekkursion.exactratingbar.enums
 
 import android.util.Log
+import com.rekkursion.exactratingbar.ExactRatingBar
 import kotlin.math.max
 import kotlin.math.min
 

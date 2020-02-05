@@ -8,6 +8,11 @@ import android.graphics.PointF
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
+import com.rekkursion.exactratingbar.enums.Gravity
+import com.rekkursion.exactratingbar.enums.StarStyle
+import com.rekkursion.exactratingbar.enums.ValueChangeScale
+import com.rekkursion.exactratingbar.utils.LongClickDetectionTimer
+import com.rekkursion.exactratingbar.utils.OnValueChangedListener
 import kotlin.math.max
 import kotlin.math.min
 
@@ -37,7 +42,7 @@ class ExactRatingBar(context: Context, attrs: AttributeSet?): View(context, attr
     var maxStarsValue get() = mMaxStarsValue; set(value) { mMaxStarsValue = value; invalidate() }
 
     // the gravity's flag
-    private var mGravityFlag = com.rekkursion.exactratingbar.Gravity.CENTER_HORIZONTAL.flag or com.rekkursion.exactratingbar.Gravity.CENTER_VERTICAL.flag
+    private var mGravityFlag = Gravity.CENTER_HORIZONTAL.flag or Gravity.CENTER_VERTICAL.flag
 
     // the spacing of each star
     private var mSpacing = 10F
@@ -73,6 +78,9 @@ class ExactRatingBar(context: Context, attrs: AttributeSet?): View(context, attr
     // the listener when the value has been changed
     private var mOnValueChangedListener: OnValueChangedListener? = null
 
+    // the listener when the long-click event is invoked
+    private var mOnLongClickListener: OnLongClickListener? = null
+
     // check if the finger is touched
     private var mIsTouched = false
 
@@ -84,14 +92,18 @@ class ExactRatingBar(context: Context, attrs: AttributeSet?): View(context, attr
         if (!mIsIndicator) {
             if (motionEvent.action == MotionEvent.ACTION_DOWN) {
                 mIsTouched = true
-                mLongClickDetectionTimer = mLongClickDetectionTimer?.stop()
-                mLongClickDetectionTimer = LongClickDetectionTimer(this)
-                mLongClickDetectionTimer?.scheduleDesignatedTask()
+                if (mOnLongClickListener != null) {
+                    mLongClickDetectionTimer = mLongClickDetectionTimer?.stop()
+                    mLongClickDetectionTimer =
+                        LongClickDetectionTimer(this, mOnLongClickListener!!)
+                    mLongClickDetectionTimer?.scheduleDesignatedTask()
+                }
             }
             else {
                 if (motionEvent.action == MotionEvent.ACTION_UP)
                     mIsTouched = false
-                mLongClickDetectionTimer = mLongClickDetectionTimer?.stop()
+                if (mOnLongClickListener != null)
+                    mLongClickDetectionTimer = mLongClickDetectionTimer?.stop()
             }
 
             val newValue = getRatingValueByViewX(motionEvent.x)
@@ -119,7 +131,7 @@ class ExactRatingBar(context: Context, attrs: AttributeSet?): View(context, attr
             mValue = ta.getFloat(R.styleable.ExactRatingBar_stars_value, 5F)
             mMinStarsValue = ta.getFloat(R.styleable.ExactRatingBar_min_stars_value, 0F)
             mMaxStarsValue = ta.getFloat(R.styleable.ExactRatingBar_max_stars_value, 5F)
-            mGravityFlag = ta.getInt(R.styleable.ExactRatingBar_gravity, com.rekkursion.exactratingbar.Gravity.CENTER_HORIZONTAL.flag or com.rekkursion.exactratingbar.Gravity.CENTER_VERTICAL.flag)
+            mGravityFlag = ta.getInt(R.styleable.ExactRatingBar_gravity, Gravity.CENTER_HORIZONTAL.flag or Gravity.CENTER_VERTICAL.flag)
             mSpacing = ta.getFloat(R.styleable.ExactRatingBar_spacing, 10F)
             mStarStyleIndex = min(StarStyle.values().size - 1, max(0, ta.getInt(R.styleable.ExactRatingBar_star_style, 0)))
             mStarSizeIncludesSpacing = max(0F, ta.getFloat(R.styleable.ExactRatingBar_star_size, 100F))
@@ -201,11 +213,7 @@ class ExactRatingBar(context: Context, attrs: AttributeSet?): View(context, attr
 
     // override the set-on-long-click-listener to do the default listener
     override fun setOnLongClickListener(l: OnLongClickListener?) {
-        val onLongClickListener = OnLongClickListener {
-            val defaultReturnValue = mDefaultOnLongClickListener.onLongClick(it)
-            l?.onLongClick(it) ?: defaultReturnValue
-        }
-        super.setOnLongClickListener(onLongClickListener)
+        mOnLongClickListener = l
     }
 
     /* ============================================================ */
@@ -219,7 +227,8 @@ class ExactRatingBar(context: Context, attrs: AttributeSet?): View(context, attr
         super.setOnLongClickListener(mDefaultOnLongClickListener)
 
         // the default on-value-changed-listener
-        setOnValueChangedListener(object: OnValueChangedListener { override fun onValueChanged(oldValue: Float, newValue: Float): Boolean { return true } })
+        setOnValueChangedListener(object:
+            OnValueChangedListener { override fun onValueChanged(oldValue: Float, newValue: Float): Boolean { return true } })
     }
 
     // render the stars
@@ -262,7 +271,7 @@ class ExactRatingBar(context: Context, attrs: AttributeSet?): View(context, attr
         // 8: left, 16, cen_hori, 32: right
         var x = 0F; var y = 0F
         var flag = mGravityFlag
-        for (g in com.rekkursion.exactratingbar.Gravity.values().reversed()) {
+        for (g in Gravity.values().reversed()) {
             if (flag >= g.flag) {
                 flag -= g.flag
                 if (g.flag == 1 || g.flag == 2 || g.flag == 4)

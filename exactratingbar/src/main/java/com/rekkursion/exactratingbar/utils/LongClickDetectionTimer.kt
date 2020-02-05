@@ -1,22 +1,23 @@
-package com.rekkursion.exactratingbar
+package com.rekkursion.exactratingbar.utils
 
 import android.annotation.SuppressLint
 import android.os.Handler
 import android.os.Message
+import android.view.View.OnLongClickListener
+import java.util.Timer
+import java.util.TimerTask
+import com.rekkursion.exactratingbar.ExactRatingBar
 
-class LongClickDetectionTimer(exactRatingBar: ExactRatingBar): java.util.Timer() {
-    // the exact-rating-bar that will be affected
-    private val mExactRatingBar = exactRatingBar
-
+class LongClickDetectionTimer(exactRatingBar: ExactRatingBar, onLongClickListener: OnLongClickListener): Timer() {
     // the place that really do the designated task which is invoked by the timer-task
     private val mHandler = @SuppressLint("HandlerLeak") object: Handler() {
         override fun handleMessage(msg: Message) {
-
+            onLongClickListener.onLongClick(exactRatingBar)
         }
     }
 
     // the timer-task for sending the message to the handler
-    private val mTimerTask = object: java.util.TimerTask() {
+    private val mTimerTask = object: TimerTask() {
         override fun run() {
             mHandler.sendEmptyMessage(1)
         }
@@ -33,6 +34,6 @@ class LongClickDetectionTimer(exactRatingBar: ExactRatingBar): java.util.Timer()
 
     // do the designated task
     fun scheduleDesignatedTask() {
-        schedule(mTimerTask, 800L)
+        schedule(mTimerTask, 500L)
     }
 }

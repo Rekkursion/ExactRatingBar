@@ -1,4 +1,4 @@
-package com.rekkursion.exactratingbar
+package com.rekkursion.exactratingbar.enums
 
 import android.graphics.*
 import androidx.core.math.MathUtils
