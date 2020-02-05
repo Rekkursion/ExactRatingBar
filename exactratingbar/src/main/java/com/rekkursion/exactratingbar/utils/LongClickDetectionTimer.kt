@@ -8,7 +8,7 @@ import java.util.Timer
 import java.util.TimerTask
 import com.rekkursion.exactratingbar.ExactRatingBar
 
-class LongClickDetectionTimer(exactRatingBar: ExactRatingBar, onLongClickListener: OnLongClickListener): Timer() {
+internal class LongClickDetectionTimer(exactRatingBar: ExactRatingBar, onLongClickListener: OnLongClickListener): Timer() {
     // the place that really do the designated task which is invoked by the timer-task
     private val mHandler = @SuppressLint("HandlerLeak") object: Handler() {
         override fun handleMessage(msg: Message) {

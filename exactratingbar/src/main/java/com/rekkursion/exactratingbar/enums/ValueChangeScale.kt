@@ -62,7 +62,6 @@ enum class ValueChangeScale(val getRatingValueByViewX: (x: Float, leftMostOfStar
     }),
 
     CONTINUOUS({ x, leftMostOfStars, erb ->
-        Log.e("f", "cc")
         val totalWidth = erb.starSize * erb.numOfStars
         when {
             x <= leftMostOfStars ->

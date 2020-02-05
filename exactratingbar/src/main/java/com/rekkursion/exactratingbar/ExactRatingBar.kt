@@ -12,7 +12,7 @@ import com.rekkursion.exactratingbar.enums.Gravity
 import com.rekkursion.exactratingbar.enums.StarStyle
 import com.rekkursion.exactratingbar.enums.ValueChangeScale
 import com.rekkursion.exactratingbar.utils.LongClickDetectionTimer
-import com.rekkursion.exactratingbar.utils.OnValueChangedListener
+import com.rekkursion.exactratingbar.utils.OnValueChangeListener
 import kotlin.math.max
 import kotlin.math.min
 
@@ -76,7 +76,7 @@ class ExactRatingBar(context: Context, attrs: AttributeSet?): View(context, attr
     private val mPaint = Paint()
 
     // the listener when the value has been changed
-    private var mOnValueChangedListener: OnValueChangedListener? = null
+    private var mOnValueChangeListener: OnValueChangeListener? = null
 
     // the listener when the long-click event is invoked
     private var mOnLongClickListener: OnLongClickListener? = null
@@ -107,7 +107,8 @@ class ExactRatingBar(context: Context, attrs: AttributeSet?): View(context, attr
             }
 
             val newValue = getRatingValueByViewX(motionEvent.x)
-            if (mOnValueChangedListener?.onValueChanged(mValue, newValue) == true) mValue = newValue
+            if (mValue != newValue && mOnValueChangeListener?.onValueChange(mValue, newValue) == true)
+                mValue = newValue
 
             invalidate()
         }
@@ -153,8 +154,8 @@ class ExactRatingBar(context: Context, attrs: AttributeSet?): View(context, attr
     /* ============================================================ */
 
     // set the listener for listening the value's change
-    fun setOnValueChangedListener(onValueChangedListener: OnValueChangedListener) {
-        mOnValueChangedListener = onValueChangedListener
+    fun setOnValueChangeListener(onValueChangeListener: OnValueChangeListener) {
+        mOnValueChangeListener = onValueChangeListener
     }
 
     // set the gravity by
@@ -227,8 +228,7 @@ class ExactRatingBar(context: Context, attrs: AttributeSet?): View(context, attr
         super.setOnLongClickListener(mDefaultOnLongClickListener)
 
         // the default on-value-changed-listener
-        setOnValueChangedListener(object:
-            OnValueChangedListener { override fun onValueChanged(oldValue: Float, newValue: Float): Boolean { return true } })
+        setOnValueChangeListener(object: OnValueChangeListener { override fun onValueChange(oldValue: Float, newValue: Float): Boolean { return true } })
     }
 
     // render the stars
