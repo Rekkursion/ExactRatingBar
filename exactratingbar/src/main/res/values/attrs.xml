@@ -37,6 +37,8 @@
             <enum name="triangle" value="3" />
             <enum name="rhombus" value="4" />
             <enum name="diamond" value="5" />
+            <enum name="hexagram" value="6" />
+            <enum name="light" value="7" />
         </attr>
         <!-- the rendering size of each star -->
         <attr name="star_size" format="float" />

@@ -1,7 +1,6 @@
 package com.rekkursion.exactratingbar.enums
 
 import android.graphics.*
-import androidx.core.math.MathUtils
 import kotlin.math.*
 
 enum class StarStyle(val getShapedPath: (x: Float, y: Float, size: Float) -> Path) {
@@ -103,7 +102,53 @@ enum class StarStyle(val getShapedPath: (x: Float, y: Float, size: Float) -> Pat
         path.close()
         // return the path
         path
+    }),
+
+    HEXAGRAM({ x, y, size ->
+        val bigR = size / 2F
+        val smallR = bigR / sqrt(3F)
+        val cX = x + bigR
+        val cY = y + bigR
+
+        // the path object
+        val path = Path()
+        // move to top & horizontal-center
+        path.moveTo(cX, y)
+        // build up a hexagram
+        for (idx in 0..5) {
+            var angle = ((idx * 60 + 30 - 90) * PI / 180).toFloat()
+            path.lineTo(cX + smallR * cos(angle), cY + smallR * sin(angle))
+            angle = ((idx * 60 + 60 - 90) * PI / 180).toFloat()
+            path.lineTo(cX + bigR * cos(angle), cY + bigR * sin(angle))
+        }
+        path.close()
+        // return the path
+        path
+    }),
+
+    LIGHT({ x, y, size ->
+        val bigR = size / 2F
+        val smallR = bigR / 7.77F
+        val cX = x + bigR
+        val cY = y + bigR
+
+        // the path object
+        val path = Path()
+        // move to top & horizontal-center
+        path.moveTo(cX, y)
+        // build up a hexagram
+        for (idx in 0..3) {
+            var angle = ((idx * 90 + 45 - 90) * PI / 180).toFloat()
+            path.lineTo(cX + smallR * cos(angle), cY + smallR * sin(angle))
+            angle = ((idx * 90 + 90 - 90) * PI / 180).toFloat()
+            path.lineTo(cX + bigR * cos(angle), cY + bigR * sin(angle))
+        }
+        path.close()
+        // return the path
+        path
     });
+
+    /* ============================================================ */
 
     // render a single star on the passed canvas using the passed paint
     fun renderSingleStar(canvas: Canvas, paint: Paint, x: Float, y: Float, size: Float, valueColor: Int, baseColor: Int, valuedRatio: Float) {
