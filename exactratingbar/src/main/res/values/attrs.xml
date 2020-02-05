@@ -1,10 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <declare-styleable name="ExactRatingBar">
-        <!-- could the value be altered or not -->
-        <attr name="alterable" format="boolean" />
+        <!-- is indicator or not -->
+        <attr name="is_indicator" format="boolean" />
         <!-- the number of stars -->
         <attr name="stars_num" format="integer" />
+        <!-- the scale of the value's change -->
+        <attr name="value_change_scale" format="enum">
+            <enum name="half_star" value="0" />
+            <enum name="whole_single_star" value="1" />
+            <enum name="continuous" value="2" />
+        </attr>
         <!-- the default value of stars -->
         <attr name="stars_value" format="float" />
         <!-- the minimum value of stars -->

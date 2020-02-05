@@ -13,12 +13,16 @@ import kotlin.math.min
 
 class ExactRatingBar(context: Context, attrs: AttributeSet?): View(context, attrs) {
     // could the value be altered or not
-    private var mAlterable = true
-    var alterable get() = mAlterable; set(value) { mAlterable = value; invalidate() }
+    private var mIsIndicator = false
+    var isIndicator get() = mIsIndicator; set(value) { mIsIndicator = value; invalidate() }
 
     // the number of stars
     private var mNumOfStars = 5
     var numOfStars get() = mNumOfStars; set(value) { mNumOfStars = value; invalidate() }
+
+    // the scale of the value's change
+    private var mValueChangeScaleIndex = 0
+    var valueChangeScale: ValueChangeScale get() = ValueChangeScale.values()[mValueChangeScaleIndex]; set(value) { mValueChangeScaleIndex = value.ordinal; invalidate() }
 
     // the current value of stars
     private var mValue = 5F
@@ -72,12 +76,22 @@ class ExactRatingBar(context: Context, attrs: AttributeSet?): View(context, attr
     // check if the finger is touched
     private var mIsTouched = false
 
+    // the timer used to detect the long-click event
+    private var mLongClickDetectionTimer: LongClickDetectionTimer? = null
+
     // the default on-touch-listener
     private val mDefaultOnTouchListener = OnTouchListener { _, motionEvent ->
-        if (alterable) {
-            when (motionEvent.action) {
-                MotionEvent.ACTION_DOWN -> mIsTouched = true
-                MotionEvent.ACTION_UP -> mIsTouched = false
+        if (!mIsIndicator) {
+            if (motionEvent.action == MotionEvent.ACTION_DOWN) {
+                mIsTouched = true
+                mLongClickDetectionTimer = mLongClickDetectionTimer?.stop()
+                mLongClickDetectionTimer = LongClickDetectionTimer(this)
+                mLongClickDetectionTimer?.scheduleDesignatedTask()
+            }
+            else {
+                if (motionEvent.action == MotionEvent.ACTION_UP)
+                    mIsTouched = false
+                mLongClickDetectionTimer = mLongClickDetectionTimer?.stop()
             }
 
             val newValue = getRatingValueByViewX(motionEvent.x)
@@ -99,8 +113,9 @@ class ExactRatingBar(context: Context, attrs: AttributeSet?): View(context, attr
         attrs?.let {
             val ta = context.obtainStyledAttributes(attrs, R.styleable.ExactRatingBar)
 
-            mAlterable = ta.getBoolean(R.styleable.ExactRatingBar_alterable, true)
+            mIsIndicator = ta.getBoolean(R.styleable.ExactRatingBar_is_indicator, false)
             mNumOfStars = max(1, ta.getInteger(R.styleable.ExactRatingBar_stars_num, 5))
+            mValueChangeScaleIndex = min(ValueChangeScale.values().size - 1, max(0, ta.getInt(R.styleable.ExactRatingBar_value_change_scale, 0)))
             mValue = ta.getFloat(R.styleable.ExactRatingBar_stars_value, 5F)
             mMinStarsValue = ta.getFloat(R.styleable.ExactRatingBar_min_stars_value, 0F)
             mMaxStarsValue = ta.getFloat(R.styleable.ExactRatingBar_max_stars_value, 5F)
@@ -263,27 +278,6 @@ class ExactRatingBar(context: Context, attrs: AttributeSet?): View(context, attr
     // get the value of the exact-rating-bar by a certain x-axis value
     private fun getRatingValueByViewX(x: Float): Float {
         val leftMostOfStars = getUpLeftCornerOfFirstStar().x
-        val totalWidth = mStarSizeIncludesSpacing * mNumOfStars
-
-        if (x <= leftMostOfStars)
-            return max(0F, mMinStarsValue)
-        else if (x >= leftMostOfStars + totalWidth)
-            return min(mNumOfStars.toFloat(), mMaxStarsValue)
-
-        var curW = leftMostOfStars + mSpacing
-        var value = 0F
-        for (starValue in 1..mNumOfStars) {
-            if (x >= curW) value += 0.5F
-            curW += (mStarSizeIncludesSpacing - mSpacing * 2F) / 2F
-            if (x >= curW) value += 0.5F
-            curW += (mStarSizeIncludesSpacing - mSpacing * 2F) / 2F
-            curW += mSpacing * 2F
-        }
-
-        // bound the value
-        if (value < mMinStarsValue) value = mMinStarsValue
-        if (value > mMaxStarsValue) value = mMaxStarsValue
-
-        return value
+        return ValueChangeScale.values()[mValueChangeScaleIndex].getRatingValueByViewX(x, leftMostOfStars, this)
     }
 }
