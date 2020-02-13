@@ -1,37 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.appcompat.widget.LinearLayoutCompat
         xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:orientation="vertical"
+        android:layout_margin="8dp"
+        android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:context=".MainActivity">
+        android:layout_height="wrap_content">
 
-    <androidx.appcompat.widget.AppCompatRatingBar
-            android:id="@+id/rb"
-            android:numStars="5"
-            android:rating="3.3"
-            android:layout_width="match_parent"
+    <!-- the text-view for showing the field name -->
+    <TextView
+            android:id="@+id/txtv_field_name"
+            android:textSize="16sp"
+            android:textAlignment="center"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:layout_weight="30"
+            android:layout_width="0dp"
             android:layout_height="wrap_content" />
 
-    <com.rekkursion.exactratingbar.ExactRatingBar
-            android:id="@+id/erb"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            app:is_indicator="false"
-            app:gravity="center"
-            app:stars_num="5"
-            app:value_change_scale="continuous"
-            app:stars_value="3.3"
-            app:min_stars_value="0"
-            app:max_stars_value="5"
-            app:star_style="light"
-            app:star_size="172.1"
-            app:star_value_color="@color/colorAccent"
-            app:star_base_color="@android:color/darker_gray"
-            app:star_base_pressed_color="#77F4AC92"
-            app:bg_color="@android:color/transparent"
-            app:spacing="16.5" />
+    <!-- the container for placing the field content -->
+    <FrameLayout
+            android:id="@+id/fly_field_content_container"
+            android:layout_weight="13"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content">
+    </FrameLayout>
 </androidx.appcompat.widget.LinearLayoutCompat>

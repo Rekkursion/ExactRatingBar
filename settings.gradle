@@ -1,1 +1,1 @@
-include ':app', ':exactratingbar'
+include ':app', ':exactratingbar', ':dialogfloatingactionbuttonsample'

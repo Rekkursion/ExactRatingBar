@@ -188,7 +188,14 @@ class ExactRatingBar(context: Context, attrs: AttributeSet?): View(context, attr
             // unspecified
             else -> suggestedMinimumWidth + paddingLeft + paddingRight
         }
-        setMeasuredDimension(desiredWidth, desiredHeight)
+
+        if (desiredWidth == 0 || desiredHeight == 0)
+            setMeasuredDimension(
+                mStarSizeIncludesSpacing.toInt() * mNumOfStars,
+                mStarSizeIncludesSpacing.toInt()
+            )
+        else
+            setMeasuredDimension(desiredWidth, desiredHeight)
     }
 
     // render
