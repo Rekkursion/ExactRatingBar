@@ -128,7 +128,7 @@ enum class StarStyle(val getShapedPath: (x: Float, y: Float, size: Float) -> Pat
 
     LIGHT({ x, y, size ->
         val bigR = size / 2F
-        val smallR = bigR / 7.77F
+        val smallR = bigR / 6.77F
         val cX = x + bigR
         val cY = y + bigR
 
