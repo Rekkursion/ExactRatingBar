@@ -10,14 +10,16 @@
     <com.rekkursion.exactratingbar.ExactRatingBar
             android:id="@+id/erb_example"
             app:is_indicator="false"
-            app:spacing="6dp"
-            app:star_size="50dp"
             app:stars_num="5"
-            app:star_style="star"
-            app:value_change_scale="continuous"
+            app:stars_value="2"
             app:min_stars_value="1.5"
             app:max_stars_value="4.7"
-            android:layout_width="wrap_content"
+            app:gravity="center"
+            app:spacing="6dp"
+            app:star_size="50dp"
+            app:star_style="star"
+            app:value_change_scale="continuous"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
     <!-- the text-view for showing the old & new value of the erb when the value changed -->
