@@ -30,7 +30,7 @@ class ExactRatingBar(context: Context, attrs: AttributeSet?): View(context, attr
     var valueChangeScale: ValueChangeScale get() = ValueChangeScale.values()[mValueChangeScaleIndex]; set(value) { mValueChangeScaleIndex = value.ordinal; invalidate() }
 
     // the current value of stars
-    private var mValue = 5F
+    private var mValue = mNumOfStars.toFloat()
     var currentValue get() = mValue; set(value) { mValue = min(mMaxStarsValue, max(mMinStarsValue, value)); invalidate() }
 
     // the minimum value of stars
@@ -38,7 +38,7 @@ class ExactRatingBar(context: Context, attrs: AttributeSet?): View(context, attr
     var minStarsValue get() = mMinStarsValue; set(value) { mMinStarsValue = value; invalidate() }
 
     // the maximum value of stars
-    private var mMaxStarsValue = 5F
+    private var mMaxStarsValue = mNumOfStars.toFloat()
     var maxStarsValue get() = mMaxStarsValue; set(value) { mMaxStarsValue = value; invalidate() }
 
     // the gravity's flag
@@ -129,13 +129,13 @@ class ExactRatingBar(context: Context, attrs: AttributeSet?): View(context, attr
             mIsIndicator = ta.getBoolean(R.styleable.ExactRatingBar_is_indicator, false)
             mNumOfStars = max(1, ta.getInteger(R.styleable.ExactRatingBar_stars_num, 5))
             mValueChangeScaleIndex = min(ValueChangeScale.values().size - 1, max(0, ta.getInt(R.styleable.ExactRatingBar_value_change_scale, 0)))
-            mValue = ta.getFloat(R.styleable.ExactRatingBar_stars_value, 5F)
+            mValue = ta.getFloat(R.styleable.ExactRatingBar_stars_value, mNumOfStars.toFloat())
             mMinStarsValue = ta.getFloat(R.styleable.ExactRatingBar_min_stars_value, 0F)
-            mMaxStarsValue = ta.getFloat(R.styleable.ExactRatingBar_max_stars_value, 5F)
+            mMaxStarsValue = ta.getFloat(R.styleable.ExactRatingBar_max_stars_value, mNumOfStars.toFloat())
             mGravityFlag = ta.getInt(R.styleable.ExactRatingBar_gravity, Gravity.CENTER_HORIZONTAL.flag or Gravity.CENTER_VERTICAL.flag)
-            mSpacing = ta.getFloat(R.styleable.ExactRatingBar_spacing, 10F)
+            mSpacing = ta.getDimensionPixelSize(R.styleable.ExactRatingBar_spacing, 10).toFloat()
             mStarStyleIndex = min(StarStyle.values().size - 1, max(0, ta.getInt(R.styleable.ExactRatingBar_star_style, 0)))
-            mStarSizeIncludesSpacing = max(0F, ta.getFloat(R.styleable.ExactRatingBar_star_size, 100F))
+            mStarSizeIncludesSpacing = max(0, ta.getDimensionPixelSize(R.styleable.ExactRatingBar_star_size, 100)).toFloat()
             mStarValueColor = ta.getColor(R.styleable.ExactRatingBar_star_value_color, Color.parseColor("#F88B30"))
             mStarBaseColor = ta.getColor(R.styleable.ExactRatingBar_star_base_color, Color.LTGRAY)
             mStarBasePressedColor = ta.getColor(R.styleable.ExactRatingBar_star_base_pressed_color, Color.parseColor("#77F4AC92"))

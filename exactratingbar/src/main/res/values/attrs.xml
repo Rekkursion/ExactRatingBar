@@ -28,7 +28,7 @@
             <flag name="center" value="18" />
         </attr>
         <!-- the spacing of each star -->
-        <attr name="spacing" format="float" />
+        <attr name="spacing" format="dimension" />
         <!-- the style of stars -->
         <attr name="star_style" format="enum">
             <enum name="star" value="0" />
@@ -41,7 +41,7 @@
             <enum name="light" value="7" />
         </attr>
         <!-- the rendering size of each star -->
-        <attr name="star_size" format="float" />
+        <attr name="star_size" format="dimension" />
         <!-- the color of each valued star -->
         <attr name="star_value_color" format="reference|color" />
         <!-- the color of each star's background -->
